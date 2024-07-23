@@ -1,4 +1,4 @@
-FROM ros:noetic-ros-base-focal
+FROM ros:humble
 # FROM ubuntu:20.04 as cpu
 ARG UID=1000
 ARG GID=1000
@@ -7,7 +7,7 @@ ARG GPIOID=993
 ARG I2CID=994
 ARG SPIID=995
 
-LABEL maintainer "Henrik Trommer <henrik.trommer@uni-goettingen.de>"
+LABEL maintainer "Ömer Efe Çelik <heblushabus@aaal.net.tr>"
 
 SHELL ["/bin/bash","-c"]
 
@@ -33,29 +33,28 @@ RUN apt -y install pciutils zlib1g unzip mlocate python3-pyqt5
 
 ################################################################
 ## END: packages
-## BEGIN: ros:noetic
+## BEGIN: ros:humble
 ################################################################
 
 RUN apt update && apt install --no-install-recommends -y \
     python3-rosdep \
     python3-rosinstall \
     python3-vcstools \
-    python3-catkin-tools \
-    ros-noetic-cv-bridge \
-    ros-noetic-tf \
-    ros-noetic-wfov-camera-msgs \
-    ros-noetic-image-exposure-msgs \
-    ros-noetic-camera-info-manager \
-    ros-noetic-image-transport \
-    ros-noetic-roslint \
-    ros-noetic-image-proc \
-    ros-noetic-robot-state-publisher \
-    ros-noetic-diagnostic-updater \
-    ros-noetic-xacro
+    ros-humble-cv-bridge \
+    ros-humble-tf \
+    ros-humble-wfov-camera-msgs \
+    ros-humble-image-exposure-msgs \
+    ros-humble-camera-info-manager \
+    ros-humble-image-transport \
+    ros-humble-roslint \
+    ros-humble-image-proc \
+    ros-humble-robot-state-publisher \
+    ros-humble-diagnostic-updater \
+    ros-humble-xacro
 
 
 ################################################################
-## END: ros:noetic
+## END: ros:humble
 ## BEGIN: python packages
 ################################################################
 RUN apt update && apt install --no-install-recommends -y \
@@ -85,11 +84,6 @@ RUN sudo ninja -C build install
 ## BEGIN: LCCV
 ################################################################
 RUN apt install -y libopencv-dev
-RUN git clone https://github.com/kbarni/LCCV.git /opt/LCCV
-RUN mkdir /opt/LCCV/build
-WORKDIR /opt/LCCV/build
-RUN cmake ..
-RUN sudo make install
 ################################################################
 ## END: LCCV
 ## BEGIN: user setup
@@ -106,18 +100,18 @@ WORKDIR /home/docker
 ################################################################
 
 # Create local catkin workspace
-ENV CATKIN_WS=/home/docker/catkin_ws
+ENV COLCON_WS=/home/docker/colcon_ws
 ENV ROS_PYTHON_VERSION=3
-WORKDIR $CATKIN_WS
+WORKDIR $COLCON_WS
 
 # Initialize local catkin workspace
 RUN source /opt/ros/${ROS_DISTRO}/setup.bash \
-    && cd $CATKIN_WS \
+    && cd $COLCON_WS \
     && rosdep install -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO}
 
 RUN apt update && apt install --no-install-recommends -y \
     bash-completion \
-    ros-noetic-image-pipeline \
+    ros-humble-image-pipeline \
     python3-tk
 
 # apt cache fix
@@ -141,7 +135,7 @@ RUN echo 'set completion-ignore-case On' >> /etc/inputrc
 ## BEGIN: 
 ################################################################
 
-WORKDIR $CATKIN_WS
+WORKDIR $COLCON_WS
 
 COPY .bashrc /home/docker/.bashrc
 
